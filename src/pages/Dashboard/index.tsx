@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
 import { Title, Form, Repositories, Error } from './styles';
 import logo from '../../assets/logo.svg';
@@ -17,8 +17,24 @@ const Dashboard: React.FC = () => {
   const [newRepo, setNewRepo] = useState('');
   const [inputError, setInputError] = useState('');
 
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [repositories, setRepositories] = useState<Repository[]>(() => {
+    const storageRepositories = localStorage.getItem(
+      '@GithubExplorer:repositories',
+    );
 
+    if (storageRepositories) {
+      return JSON.parse(storageRepositories);
+    }
+
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      '@GithubExplorer:repositories',
+      JSON.stringify(repositories),
+    );
+  }, [repositories]);
   async function handleAddRepository(
     event: FormEvent<HTMLFormElement>,
   ): Promise<void> {
@@ -49,7 +65,7 @@ const Dashboard: React.FC = () => {
           onChange={e => setNewRepo(e.target.value)}
           placeholder="Pesquise aqui"
         />
-        <button>Buscar</button>
+        <button type="submit">Buscar</button>
       </Form>
       {inputError && <Error>{inputError}</Error>}
       <Repositories>
